@@ -1,0 +1,97 @@
+{
+	"info": {
+		"_postman_id": "eval-svc-001",
+		"name": "TutorBot — Evaluator Service",
+		"description": "Complete API collection for evaluator-service (port 8082). Covers all CRUD endpoints and the AI-powered POST evaluation via Ollama/gemma3.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{ "key": "baseUrl", "value": "http://localhost:8082" }
+	],
+	"item": [
+		{
+			"name": "1 — List All Evaluations",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": { "raw": "{{baseUrl}}/api/v1/evaluations", "host": ["{{baseUrl}}"], "path": ["api","v1","evaluations"] },
+				"description": "Returns all evaluations from Oracle. The seed data contains 300 rows."
+			}
+		},
+		{
+			"name": "2 — Get Evaluation by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": { "raw": "{{baseUrl}}/api/v1/evaluations/153", "host": ["{{baseUrl}}"], "path": ["api","v1","evaluations","153"] },
+				"description": "Fetch a single evaluation by its primary key. Returns 404 if not found."
+			}
+		},
+		{
+			"name": "3 — Get Evaluations by Student",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": { "raw": "{{baseUrl}}/api/v1/evaluations/student/A00835001", "host": ["{{baseUrl}}"], "path": ["api","v1","evaluations","student","A00835001"] },
+				"description": "Filter evaluations by student matrícula. Seed data has students A00835001 through A00835015."
+			}
+		},
+		{
+			"name": "4 — Get Evaluations by Session",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": { "raw": "{{baseUrl}}/api/v1/evaluations/session/SESSION-0001", "host": ["{{baseUrl}}"], "path": ["api","v1","evaluations","session","SESSION-0001"] },
+				"description": "Filter evaluations by session ID."
+			}
+		},
+		{
+			"name": "5 — POST Evaluate (AI — Ollama gemma3)",
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"sessionId\": \"SESSION-DEMO-001\",\n  \"studentId\": \"A00835001\",\n  \"questionText\": \"¿Qué es un closure en JavaScript y para qué sirve?\",\n  \"studentAnswer\": \"Un closure es cuando una función recuerda las variables de afuera\",\n  \"correctAnswer\": \"Un closure es una función junto con su entorno léxico. Permite acceder a variables del scope padre incluso después de que la función padre haya retornado.\",\n  \"maxScore\": 100,\n  \"topicId\": 2\n}"
+				},
+				"url": { "raw": "{{baseUrl}}/api/v1/evaluations", "host": ["{{baseUrl}}"], "path": ["api","v1","evaluations"] },
+				"description": "Creates a new evaluation. Sends the question, student answer and correct answer to Ollama (gemma3:4b) for AI scoring. Returns 201 with score and feedback in Spanish."
+			}
+		},
+		{
+			"name": "6 — POST Evaluate (Spring Boot topic)",
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"sessionId\": \"SESSION-DEMO-002\",\n  \"studentId\": \"A00835003\",\n  \"questionText\": \"¿Cuál es la diferencia entre @Controller y @RestController en Spring?\",\n  \"studentAnswer\": \"@RestController es para APIs y @Controller para vistas\",\n  \"correctAnswer\": \"@Controller retorna vistas. @RestController añade @ResponseBody implícitamente para retornar datos JSON/XML directamente.\",\n  \"maxScore\": 100,\n  \"topicId\": 3\n}"
+				},
+				"url": { "raw": "{{baseUrl}}/api/v1/evaluations", "host": ["{{baseUrl}}"], "path": ["api","v1","evaluations"] },
+				"description": "AI evaluation on a Spring Boot topic."
+			}
+		},
+		{
+			"name": "7 — POST Evaluate (SQL topic)",
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"sessionId\": \"SESSION-DEMO-003\",\n  \"studentId\": \"A00835007\",\n  \"questionText\": \"¿Qué es la normalización y cuáles son sus formas normales?\",\n  \"studentAnswer\": \"La normalización organiza datos en tablas para evitar duplicados. Tiene formas como 1FN y 2FN.\",\n  \"correctAnswer\": \"1FN: atributos atómicos. 2FN: sin dependencias parciales. 3FN: sin dependencias transitivas. BCNF: todo determinante es clave candidata.\",\n  \"maxScore\": 100,\n  \"topicId\": 10\n}"
+				},
+				"url": { "raw": "{{baseUrl}}/api/v1/evaluations", "host": ["{{baseUrl}}"], "path": ["api","v1","evaluations"] },
+				"description": "AI evaluation on a Database Normalization topic."
+			}
+		},
+		{
+			"name": "8 — GET Not Found (404 test)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": { "raw": "{{baseUrl}}/api/v1/evaluations/99999", "host": ["{{baseUrl}}"], "path": ["api","v1","evaluations","99999"] },
+				"description": "Tests the error handler. Should return 404 with {\"error\": \"Evaluation not found: 99999\"}."
+			}
+		}
+	]
+}

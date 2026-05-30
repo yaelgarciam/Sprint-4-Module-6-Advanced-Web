@@ -1,0 +1,12 @@
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/session-service/src/main/java/com/tutorbot/session/SessionServiceApplication.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/session-service/src/main/java/com/tutorbot/session/agent/SessionAgent.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/session-service/src/main/java/com/tutorbot/session/config/SessionRedisConfig.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/session-service/src/main/java/com/tutorbot/session/controller/SessionController.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/session-service/src/main/java/com/tutorbot/session/model/ExamResult.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/session-service/src/main/java/com/tutorbot/session/model/ExamSummary.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/session-service/src/main/java/com/tutorbot/session/model/SessionContext.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/session-service/src/main/java/com/tutorbot/session/model/SessionMessage.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/session-service/src/main/java/com/tutorbot/session/model/StudyRecommendation.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/session-service/src/main/java/com/tutorbot/session/model/StudyResource.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/session-service/src/main/java/com/tutorbot/session/repository/SessionContextRepository.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/session-service/src/main/java/com/tutorbot/session/service/SessionService.java

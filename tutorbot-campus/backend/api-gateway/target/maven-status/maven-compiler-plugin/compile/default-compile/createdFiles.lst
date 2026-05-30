@@ -1,0 +1,6 @@
+com/tutorbot/apigateway/controller/GatewayController.class
+com/tutorbot/apigateway/config/SecurityConfig.class
+com/tutorbot/apigateway/ApiGatewayApplication.class
+com/tutorbot/apigateway/service/RouteCatalogService.class
+com/tutorbot/apigateway/controller/ProxyController.class
+com/tutorbot/apigateway/controller/LabProxyController.class

@@ -1,0 +1,7 @@
+com/tutorbot/exercise/model/ExerciseRecommendation.class
+com/tutorbot/exercise/config/ExerciseInfrastructureConfig.class
+com/tutorbot/exercise/ExerciseServiceApplication.class
+com/tutorbot/exercise/agent/ExerciseAgent.class
+com/tutorbot/exercise/controller/ExerciseController.class
+com/tutorbot/exercise/service/ExerciseService.class
+com/tutorbot/exercise/repository/ExerciseRecommendationRepository.class

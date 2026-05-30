@@ -1,0 +1,119 @@
+{
+	"info": {
+		"name": "TutorBot Oracle Services",
+		"description": "Colección para los microservicios de TutorBot Campus que usan Oracle: evaluator-service (8082) y gap-detector-service (8084).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "evaluator_url",
+			"value": "http://localhost:8082"
+		},
+		{
+			"key": "gap_detector_url",
+			"value": "http://localhost:8084"
+		}
+	],
+	"item": [
+		{
+			"name": "Evaluator Service",
+			"item": [
+				{
+					"name": "GET - Listar todas las evaluaciones",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{evaluator_url}}/api/v1/evaluations",
+							"host": ["{{evaluator_url}}"],
+							"path": ["api", "v1", "evaluations"]
+						}
+					}
+				},
+				{
+					"name": "POST - Crear evaluación",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sessionId\": \"S-2024-006\",\n  \"score\": 90,\n  \"feedbackSummary\": \"Outstanding performance in data structures\"\n}"
+						},
+						"url": {
+							"raw": "{{evaluator_url}}/api/v1/evaluations",
+							"host": ["{{evaluator_url}}"],
+							"path": ["api", "v1", "evaluations"]
+						}
+					}
+				},
+				{
+					"name": "GET - Health Check (Evaluator)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{evaluator_url}}/actuator/health",
+							"host": ["{{evaluator_url}}"],
+							"path": ["actuator", "health"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Gap Detector Service",
+			"item": [
+				{
+					"name": "GET - Listar todos los gaps",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gap_detector_url}}/api/v1/gaps",
+							"host": ["{{gap_detector_url}}"],
+							"path": ["api", "v1", "gaps"]
+						}
+					}
+				},
+				{
+					"name": "POST - Crear gap",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"U-2024-003\",\n  \"concept\": \"Graph Traversal\",\n  \"severity\": \"HIGH\"\n}"
+						},
+						"url": {
+							"raw": "{{gap_detector_url}}/api/v1/gaps",
+							"host": ["{{gap_detector_url}}"],
+							"path": ["api", "v1", "gaps"]
+						}
+					}
+				},
+				{
+					"name": "GET - Health Check (Gap Detector)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gap_detector_url}}/actuator/health",
+							"host": ["{{gap_detector_url}}"],
+							"path": ["actuator", "health"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,7 @@
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/api-gateway/src/main/java/com/tutorbot/apigateway/ApiGatewayApplication.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/api-gateway/src/main/java/com/tutorbot/apigateway/config/SecurityConfig.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/api-gateway/src/main/java/com/tutorbot/apigateway/controller/AuthController.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/api-gateway/src/main/java/com/tutorbot/apigateway/controller/GatewayController.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/api-gateway/src/main/java/com/tutorbot/apigateway/controller/LabProxyController.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/api-gateway/src/main/java/com/tutorbot/apigateway/controller/ProxyController.java
+/Users/yaelgarciam/Web2026/tutorbot-campus/backend/api-gateway/src/main/java/com/tutorbot/apigateway/service/RouteCatalogService.java

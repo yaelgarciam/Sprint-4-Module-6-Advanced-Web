@@ -1,0 +1,13 @@
+/Users/adolfoarroyo/Documents/Tecmx/sexto semestre/Web/src2026/TutorBot/tutorbot-campus/backend/learning-path-service/src/main/java/com/tutorbot/learningpath/LearningPathServiceApplication.java
+/Users/adolfoarroyo/Documents/Tecmx/sexto semestre/Web/src2026/TutorBot/tutorbot-campus/backend/learning-path-service/src/main/java/com/tutorbot/learningpath/agent/LearningPathAgent.java
+/Users/adolfoarroyo/Documents/Tecmx/sexto semestre/Web/src2026/TutorBot/tutorbot-campus/backend/learning-path-service/src/main/java/com/tutorbot/learningpath/config/LearningPathMessagingConfig.java
+/Users/adolfoarroyo/Documents/Tecmx/sexto semestre/Web/src2026/TutorBot/tutorbot-campus/backend/learning-path-service/src/main/java/com/tutorbot/learningpath/config/OllamaConfig.java
+/Users/adolfoarroyo/Documents/Tecmx/sexto semestre/Web/src2026/TutorBot/tutorbot-campus/backend/learning-path-service/src/main/java/com/tutorbot/learningpath/controller/LearningPathController.java
+/Users/adolfoarroyo/Documents/Tecmx/sexto semestre/Web/src2026/TutorBot/tutorbot-campus/backend/learning-path-service/src/main/java/com/tutorbot/learningpath/event/GapDetectedEvent.java
+/Users/adolfoarroyo/Documents/Tecmx/sexto semestre/Web/src2026/TutorBot/tutorbot-campus/backend/learning-path-service/src/main/java/com/tutorbot/learningpath/event/LearningPathEventListener.java
+/Users/adolfoarroyo/Documents/Tecmx/sexto semestre/Web/src2026/TutorBot/tutorbot-campus/backend/learning-path-service/src/main/java/com/tutorbot/learningpath/event/PathUpdatedEvent.java
+/Users/adolfoarroyo/Documents/Tecmx/sexto semestre/Web/src2026/TutorBot/tutorbot-campus/backend/learning-path-service/src/main/java/com/tutorbot/learningpath/model/LearningPath.java
+/Users/adolfoarroyo/Documents/Tecmx/sexto semestre/Web/src2026/TutorBot/tutorbot-campus/backend/learning-path-service/src/main/java/com/tutorbot/learningpath/ollama/OllamaDto.java
+/Users/adolfoarroyo/Documents/Tecmx/sexto semestre/Web/src2026/TutorBot/tutorbot-campus/backend/learning-path-service/src/main/java/com/tutorbot/learningpath/ollama/OllamaService.java
+/Users/adolfoarroyo/Documents/Tecmx/sexto semestre/Web/src2026/TutorBot/tutorbot-campus/backend/learning-path-service/src/main/java/com/tutorbot/learningpath/repository/LearningPathRepository.java
+/Users/adolfoarroyo/Documents/Tecmx/sexto semestre/Web/src2026/TutorBot/tutorbot-campus/backend/learning-path-service/src/main/java/com/tutorbot/learningpath/service/LearningPathService.java

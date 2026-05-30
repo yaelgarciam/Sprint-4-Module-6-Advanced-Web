@@ -1,0 +1,97 @@
+{
+	"info": {
+		"_postman_id": "gap-svc-001",
+		"name": "TutorBot — Gap Detector Service",
+		"description": "Complete API collection for gap-detector-service (port 8084). Covers CRUD endpoints and AI-powered gap detection via Ollama/gemma3.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{ "key": "baseUrl", "value": "http://localhost:8084" }
+	],
+	"item": [
+		{
+			"name": "1 — List All Gaps",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": { "raw": "{{baseUrl}}/api/v1/gaps", "host": ["{{baseUrl}}"], "path": ["api","v1","gaps"] },
+				"description": "Returns all learning gaps from Oracle. The seed data contains 200 rows."
+			}
+		},
+		{
+			"name": "2 — Get Gap by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": { "raw": "{{baseUrl}}/api/v1/gaps/42", "host": ["{{baseUrl}}"], "path": ["api","v1","gaps","42"] },
+				"description": "Fetch a single learning gap by its primary key."
+			}
+		},
+		{
+			"name": "3 — Get Gaps by Student",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": { "raw": "{{baseUrl}}/api/v1/gaps/student/A00835001", "host": ["{{baseUrl}}"], "path": ["api","v1","gaps","student","A00835001"] },
+				"description": "Filter gaps by student ID."
+			}
+		},
+		{
+			"name": "4 — Get Unresolved Gaps by Student",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": { "raw": "{{baseUrl}}/api/v1/gaps/student/A00835001/unresolved", "host": ["{{baseUrl}}"], "path": ["api","v1","gaps","student","A00835001","unresolved"] },
+				"description": "Returns only unresolved (RESOLVED = 0) gaps for a student."
+			}
+		},
+		{
+			"name": "5 — POST Create Gap",
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"studentId\": \"A00835001\",\n  \"topicId\": 5,\n  \"subtopicId\": 12,\n  \"concept\": \"Big-O Notation\",\n  \"severity\": \"HIGH\",\n  \"confidence\": 0.92\n}"
+				},
+				"url": { "raw": "{{baseUrl}}/api/v1/gaps", "host": ["{{baseUrl}}"], "path": ["api","v1","gaps"] },
+				"description": "Creates a new learning gap manually (without AI). Returns 201."
+			}
+		},
+		{
+			"name": "6 — PATCH Resolve Gap",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": { "raw": "{{baseUrl}}/api/v1/gaps/201/resolve", "host": ["{{baseUrl}}"], "path": ["api","v1","gaps","201","resolve"] },
+				"description": "Marks a gap as resolved (RESOLVED = 1). Change 201 to an existing gap ID."
+			}
+		},
+		{
+			"name": "7 — POST Create Gap (Recursion topic)",
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"studentId\": \"A00835005\",\n  \"topicId\": 7,\n  \"subtopicId\": 18,\n  \"concept\": \"Tail Recursion vs Head Recursion\",\n  \"severity\": \"MEDIUM\",\n  \"confidence\": 0.78\n}"
+				},
+				"url": { "raw": "{{baseUrl}}/api/v1/gaps", "host": ["{{baseUrl}}"], "path": ["api","v1","gaps"] },
+				"description": "Another gap example for a recursion concept."
+			}
+		},
+		{
+			"name": "8 — POST Create Gap (SQL topic)",
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"studentId\": \"A00835010\",\n  \"topicId\": 10,\n  \"subtopicId\": 30,\n  \"concept\": \"Third Normal Form (3NF)\",\n  \"severity\": \"HIGH\",\n  \"confidence\": 0.88\n}"
+				},
+				"url": { "raw": "{{baseUrl}}/api/v1/gaps", "host": ["{{baseUrl}}"], "path": ["api","v1","gaps"] },
+				"description": "Gap creation for a database normalization concept."
+			}
+		}
+	]
+}

@@ -1,0 +1,518 @@
+Genera un documento profesional estilo Word (con formato de encabezados, negritas, tablas, bloques de código con fondo gris y numeración de pasos) para un laboratorio universitario de la materia "Programación Web" del Tecnológico de Monterrey. El documento debe tener portada institucional, índice y las secciones que detallo abajo. Usa un tono formal pero accesible. Todos los bloques de código deben ir en fuente monoespaciada (Consolas o Courier New) con fondo gris claro #F5F5F5. Incluye capturas de pantalla simuladas como "[Captura: descripción de lo que se vería]" para que el profesor las sustituya después.
+
+========================================
+DATOS DEL DOCUMENTO
+========================================
+- Materia: TC2005B — Programación Web
+- Institución: Tecnológico de Monterrey
+- Semestre: Sexto semestre, período Febrero–Junio 2026
+- Título del laboratorio: "Laboratorio: Microservicios con Spring Boot, Oracle y RabbitMQ — TutorBot Campus"
+- Profesor: (Nombre por definir)
+- Fecha estimada de entrega: (Por definir por el profesor)
+
+========================================
+ESTRUCTURA DEL DOCUMENTO
+========================================
+
+═══════════════════════════════════════
+PORTADA
+═══════════════════════════════════════
+Logo del Tec, nombre de la materia, título del laboratorio, nombre del profesor, semestre.
+
+═══════════════════════════════════════
+ÍNDICE (automático)
+═══════════════════════════════════════
+
+═══════════════════════════════════════
+SECCIÓN 0 — PANORAMA GENERAL DE LA APLICACIÓN
+═══════════════════════════════════════
+
+Escribe una introducción completa de 1–2 páginas que cubra:
+
+0.1 ¿Qué es TutorBot Campus?
+- Es una plataforma de tutoría adaptativa universitaria construida con arquitectura de microservicios.
+- Su propósito es evaluar automáticamente las respuestas de los estudiantes, detectar lagunas en su aprendizaje (learning gaps) y eventualmente sugerir rutas de estudio personalizadas.
+- Está diseñada como un sistema multi-agente donde cada servicio tiene una responsabilidad específica.
+
+0.2 Los dos microservicios que trabajaremos
+Genera una tabla con esta información:
+
+| Servicio              | Puerto | Responsabilidad                                                                 |
+|-----------------------|--------|---------------------------------------------------------------------------------|
+| evaluator-service     | 8082   | Recibe las respuestas de los estudiantes, las evalúa (con IA o por reglas), asigna puntaje y genera retroalimentación. Persiste cada evaluación en Oracle. |
+| gap-detector-service  | 8084   | Analiza las evaluaciones, detecta conceptos donde el estudiante tiene debilidades (gaps), calcula su severidad y confianza. Persiste los gaps en Oracle. |
+
+0.3 ¿Por qué base de datos Oracle?
+- En la industria enterprise, Oracle es una de las bases de datos más utilizadas.
+- Aprenderán a usar JPA/Hibernate con un motor relacional real, manejar secuencias (SEQUENCE), tipos CLOB, y escribir scripts DDL idempotentes.
+- Hibernate está configurado con `ddl-auto=validate`: NO crea tablas, las VALIDA. Ustedes deben crear el schema antes de correr los servicios.
+
+0.4 ¿Cómo se conectan los servicios entre sí?
+- En esta primera parte del laboratorio, cada servicio funciona de forma INDEPENDIENTE: entrada y salida de datos via REST (Postman) ↔ Oracle.
+- NO necesitan RabbitMQ para empezar. Los servicios tienen un feature flag (`tutorbot.messaging.enabled`) que deshabilita la mensajería.
+- Diagrama conceptual (textual, que el alumno visualice):
+
+  [Postman] → REST → [evaluator-service :8082] → Oracle (tabla EVALUATIONS)
+  [Postman] → REST → [gap-detector-service :8084] → Oracle (tablas GAPS, COURSES, TOPICS, SUBTOPICS)
+
+0.5 ¿Para qué usaremos RabbitMQ? (Parte 2)
+- RabbitMQ es un message broker que permite comunicación asíncrona entre servicios.
+- Cuando la mensajería se habilita, el flujo se convierte en:
+  1. Un evento "student.answered" llega a evaluator-service via RabbitMQ
+  2. evaluator-service evalúa → persiste en Oracle → publica "evaluation.completed"
+  3. gap-detector-service escucha "evaluation.completed" → analiza gaps → persiste → publica "gap.detected"
+- Esto es el patrón Event-Driven Architecture, fundamental en sistemas distribuidos.
+
+0.6 ¿Qué vendrá después?
+- Integración con Ollama (LLM local) para evaluación con IA
+- Service Discovery con Eureka
+- API Gateway
+- Circuit Breaker con Resilience4j
+- Frontend React
+
+Incluye un diagrama de arquitectura de alto nivel (textual o mermaid) que muestre los microservicios, Oracle, RabbitMQ, y las flechas de comunicación.
+
+═══════════════════════════════════════
+SECCIÓN 1 — PREPARACIÓN DEL ENTORNO
+═══════════════════════════════════════
+
+1.1 Requisitos previos
+Genera una tabla de verificación (checklist):
+
+| Herramienta      | Versión mínima | Comando para verificar           | Notas                                    |
+|------------------|----------------|----------------------------------|------------------------------------------|
+| Java JDK         | 21             | java -version                    | Liberica, Temurin o Oracle JDK 21        |
+| Maven            | 3.9+           | mvn -version                     | Puede usarse el wrapper ./mvnw           |
+| Git              | 2.x            | git --version                    | Necesario para clonar el repositorio     |
+| Postman          | Última         | (aplicación de escritorio)       | Para probar las APIs                     |
+| Editor/IDE       | —              | IntelliJ IDEA o VS Code          | Con extensiones de Java/Spring           |
+
+1.2 Clonar el repositorio
+```bash
+git clone <URL_DEL_REPOSITORIO_QUE_DEFINIRÁ_EL_PROFESOR>
+cd tutorbot-campus
+```
+Nota para el profesor: sustituir la URL del repositorio antes de distribuir el documento.
+
+1.3 Estructura del proyecto
+Muestra el árbol relevante:
+```
+tutorbot-campus/
+├── backend/
+│   ├── evaluator-service/       ← Microservicio de evaluación (puerto 8082)
+│   │   ├── src/main/java/com/tutorbot/evaluator/
+│   │   │   ├── controller/      ← REST endpoints
+│   │   │   ├── model/           ← Entidades JPA
+│   │   │   ├── repository/      ← Spring Data JPA
+│   │   │   ├── service/         ← Lógica de negocio
+│   │   │   ├── dto/             ← Request/Response records
+│   │   │   ├── config/          ← Configuración (DB, Ollama, RabbitMQ)
+│   │   │   └── event/           ← Eventos RabbitMQ (deshabilitados por ahora)
+│   │   └── src/main/resources/
+│   │       ├── application.properties       ← Config base (producción)
+│   │       └── application-dev.properties   ← Config desarrollo (la que usarán)
+│   └── gap-detector-service/    ← Microservicio de detección de gaps (puerto 8084)
+│       └── (misma estructura)
+└── infrastructure/
+    └── oracle/
+        ├── V1__init_schema.sql  ← Schema: tablas, secuencias, índices
+        └── V2__seed_data.sql    ← Datos de prueba (300 evaluaciones, 200 gaps)
+```
+
+═══════════════════════════════════════
+SECCIÓN 2 — PARTE 1: BASE DE DATOS ORACLE (SIN RABBIT)
+═══════════════════════════════════════
+
+2.1 Instalar Oracle Database
+Explica que tienen 3 opciones y que deben elegir una:
+
+**Opción A — Docker (Recomendada)**
+```bash
+docker run -d \
+  --name oracledb \
+  -p 1522:1522 \
+  -e ORACLE_PASSWORD=password \
+  -e APP_USER=TU_USUARIO \
+  -e APP_USER_PASSWORD=TU_PASSWORD \
+  gvenzl/oracle-xe:21-slim
+```
+Nota: la imagen tarda varios minutos en inicializar. Verificar con:
+```bash
+docker logs -f oracledb
+# Esperar hasta ver "DATABASE IS READY TO USE!"
+```
+
+**Opción B — Oracle Cloud Free Tier**
+- Pasos resumidos para crear una instancia de Oracle Autonomous Database gratuita.
+- Descargar el wallet de conexión.
+- La cadena de conexión cambiará a formato TNS.
+
+**Opción C — Instalación local de Oracle XE**
+- Descargar de oracle.com, instalar, configurar listener en el puerto deseado.
+
+2.2 ⚠️ EJERCICIO: Configurar la cadena de conexión
+Explica que el archivo que deben modificar es `application-dev.properties` en CADA servicio (hay dos copias, una por servicio). Muestra la ruta exacta:
+
+```
+backend/evaluator-service/src/main/resources/application-dev.properties
+backend/gap-detector-service/src/main/resources/application-dev.properties
+```
+
+Muestra el contenido actual relevante:
+```properties
+spring.datasource.url=jdbc:oracle:thin:@localhost:1522/TESTDB
+spring.datasource.username=Adolfo
+spring.datasource.password=password
+```
+
+Diles: "Ustedes DEBEN cambiar estos 3 valores para que coincidan con su instalación de Oracle:"
+- `localhost:1522` → su host y puerto (si usaron Docker con -p 1522:1522, localhost:1522 está bien)
+- `TESTDB` → el nombre de su PDB/service name (la imagen gvenzl/oracle-xe usa XEPDB1 por defecto si no crearon un PDB personalizado, pero si apareció TESTDB en los logs, usen ese)
+- `Adolfo` / `password` → el usuario y contraseña que configuraron
+
+Incluye una tabla de ejemplos:
+
+| Escenario                    | URL JDBC                                               |
+|------------------------------|--------------------------------------------------------|
+| Docker local puerto 1522     | jdbc:oracle:thin:@localhost:1522/XEPDB1                |
+| Docker local puerto 1521     | jdbc:oracle:thin:@localhost:1521/XEPDB1                |
+| Oracle Cloud (con wallet)    | jdbc:oracle:thin:@dbname_tp?TNS_ADMIN=/path/to/wallet  |
+| Oracle XE instalado local    | jdbc:oracle:thin:@localhost:1521/XE                    |
+
+⚠️ IMPORTANTE: Cambien los valores en los DOS servicios (evaluator-service Y gap-detector-service). Si solo lo cambian en uno, el otro fallará.
+
+2.3 Crear el schema (tablas, secuencias, índices)
+Explica:
+- Hibernate está configurado con `ddl-auto=validate`. Esto significa que NO crea tablas automáticamente, solo VERIFICA que existan. Si faltan tablas, el servicio NO arrancará.
+- El script `V1__init_schema.sql` es IDEMPOTENTE: pueden ejecutarlo múltiples veces sin problemas.
+
+```bash
+# Si usan Docker:
+docker cp infrastructure/oracle/V1__init_schema.sql oracledb:/tmp/init.sql
+docker exec -e NLS_LANG=AMERICAN_AMERICA.AL32UTF8 oracledb \
+  sqlplus -s TU_USUARIO/TU_PASSWORD@//localhost:1522/TU_SERVICE @/tmp/init.sql
+```
+
+Tablas que se crearán:
+| Tabla        | Servicio            | Descripción                                      |
+|--------------|---------------------|--------------------------------------------------|
+| EVALUATIONS  | evaluator-service   | Evaluaciones de respuestas de estudiantes         |
+| COURSES      | gap-detector-service| Catálogo de cursos                                |
+| TOPICS       | gap-detector-service| Temas de cada curso                               |
+| SUBTOPICS    | gap-detector-service| Subtemas de cada tema                             |
+| GAPS         | gap-detector-service| Lagunas de aprendizaje detectadas                 |
+
+Más 5 secuencias (SEQ_EVALUATIONS, SEQ_COURSES, SEQ_TOPICS, SEQ_SUBTOPICS, SEQ_GAPS) y 6 índices.
+
+Explica la importancia de NLS_LANG=AMERICAN_AMERICA.AL32UTF8 para que los acentos (á, é, ñ, ¿) se guarden correctamente.
+
+2.4 Cargar datos de prueba
+```bash
+docker cp infrastructure/oracle/V2__seed_data.sql oracledb:/tmp/V2.sql
+docker exec -e NLS_LANG=AMERICAN_AMERICA.AL32UTF8 oracledb \
+  sqlplus -s TU_USUARIO/TU_PASSWORD@//localhost:1522/TU_SERVICE @/tmp/V2.sql
+```
+
+Al final debe aparecer una tabla de verificación:
+```
+TBL           ROWS_CNT
+----------- ----------
+COURSES              6
+TOPICS              20
+SUBTOPICS           50
+EVALUATIONS        300
+GAPS               200
+```
+
+Si ya tienen datos previos, el script NO duplica nada (es idempotente con MERGE y guards de conteo).
+
+2.5 Compilar y correr los servicios
+Explica que necesitan abrir DOS terminales (una por servicio).
+
+**Terminal 1 — evaluator-service:**
+```bash
+cd backend/evaluator-service
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+**Terminal 2 — gap-detector-service:**
+```bash
+cd backend/gap-detector-service
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+⚠️ Notas importantes:
+- El perfil `-Dspring-boot.run.profiles=dev` activa `application-dev.properties` que tiene RabbitMQ DESHABILITADO y apunta a localhost.
+- Si Maven descarga dependencias la primera vez, es normal. Puede tardar varios minutos.
+- Si ven `BUILD FAILURE` con error de conexión a Oracle, revisen su cadena de conexión (paso 2.2).
+- Si ven `Schema-validation: missing table`, ejecuten el script V1 del paso 2.3.
+
+Señales de éxito (buscar en los logs):
+```
+evaluator-service: Oracle connection verified successfully
+evaluator-service: Started EvaluatorServiceApplication in X.X seconds
+Tomcat started on port 8082
+
+gap-detector-service: Oracle connection verified successfully
+gap-detector-service: Started GapDetectorServiceApplication in X.X seconds
+Tomcat started on port 8084
+```
+
+Nota: verán un WARNING de Hibernate "OracleDialect does not need to be specified explicitly". Es normal, no es un error.
+
+2.6 Verificar con Postman
+Diles que importen las colecciones de Postman incluidas en `infrastructure/postman/` o que creen las peticiones manualmente.
+
+**Pruebas del evaluator-service (puerto 8082):**
+
+| #  | Método | URL                                              | Resultado esperado          |
+|----|--------|--------------------------------------------------|-----------------------------|
+| 1  | GET    | http://localhost:8082/api/v1/evaluations          | Array JSON con 300 objetos  |
+| 2  | GET    | http://localhost:8082/api/v1/evaluations/301      | JSON con una evaluación     |
+| 3  | GET    | http://localhost:8082/api/v1/evaluations/99999    | 404 Not Found               |
+| 4  | GET    | http://localhost:8082/api/v1/evaluations/student/A00835003 | Evaluaciones del alumno |
+
+**Pruebas del gap-detector-service (puerto 8084):**
+
+| #  | Método | URL                                                        | Resultado esperado          |
+|----|--------|------------------------------------------------------------|-----------------------------|
+| 1  | GET    | http://localhost:8084/api/v1/gaps                           | Array JSON con 200 objetos  |
+| 2  | GET    | http://localhost:8084/api/v1/gaps/student/A00835001          | Gaps del alumno             |
+| 3  | GET    | http://localhost:8084/api/v1/gaps/student/A00835001/unresolved | Solo gaps sin resolver    |
+| 4  | GET    | http://localhost:8084/api/v1/gaps/99999                      | 404 Not Found               |
+
+Incluye un ejemplo de body para POST (crear una evaluación nueva sin necesidad de IA):
+```json
+POST http://localhost:8082/api/v1/evaluations
+Content-Type: application/json
+
+{
+  "sessionId": "SESSION-LAB-001",
+  "studentId": "A00835099",
+  "questionText": "¿Qué es un JOIN en SQL?",
+  "studentAnswer": "Un JOIN combina filas de dos o más tablas basándose en una condición.",
+  "correctAnswer": "Un JOIN es una operación que combina registros de dos o más tablas relacionadas mediante una condición de unión.",
+  "maxScore": 100,
+  "topicId": 9
+}
+```
+Respuesta esperada: 201 Created con el objeto JSON de la evaluación creada (incluyendo id, score y feedback generados).
+
+NOTA: El POST al evaluator-service intentará conectarse a Ollama (IA). Si no tienen Ollama corriendo, podrían recibir un error. Eso es esperado; la conexión con el LLM se cubrirá en un laboratorio futuro. Los GETs funcionan perfectamente sin Ollama.
+
+2.7 ✅ Entregable Parte 1
+Lista lo que deben entregar como evidencia:
+- Screenshot de sus servicios corriendo (ambos logs mostrando "Started")
+- Screenshot de Postman con al menos 3 peticiones GET exitosas a cada servicio
+- Screenshot de su Oracle con las tablas creadas (pueden usar SQL Developer, DBeaver, o sqlplus)
+- Archivo `application-dev.properties` de uno de sus servicios mostrando SU cadena de conexión personalizada
+
+═══════════════════════════════════════
+SECCIÓN 3 — PARTE 2: COMUNICACIÓN CON RABBITMQ
+═══════════════════════════════════════
+
+3.1 ¿Qué es RabbitMQ y por qué lo necesitamos?
+- RabbitMQ es un message broker open-source que implementa el protocolo AMQP.
+- Permite que los servicios se comuniquen de forma asíncrona: un servicio publica un mensaje en una cola, otro lo consume.
+- Ventajas: desacoplamiento, resilencia (si un servicio se cae, los mensajes esperan en la cola), escalabilidad.
+
+3.2 Instalar Docker (si aún no lo tienen)
+Pasos para cada plataforma:
+
+**macOS:**
+- Descargar Docker Desktop desde https://www.docker.com/products/docker-desktop/
+- Instalar el .dmg y arrastrar a Aplicaciones
+- Abrir Docker Desktop y esperar a que el icono de ballena deje de moverse
+- Verificar: `docker --version`
+
+**Windows:**
+- Descargar Docker Desktop
+- Habilitar WSL 2 si se solicita (Windows Subsystem for Linux)
+- Reiniciar si es necesario
+- Verificar: `docker --version`
+
+**Linux:**
+```bash
+sudo apt-get update
+sudo apt-get install docker.io docker-compose
+sudo systemctl start docker
+sudo usermod -aG docker $USER
+# Cerrar sesión y volver a entrar
+docker --version
+```
+
+3.3 Correr RabbitMQ en Docker
+```bash
+docker run -d \
+  --name tutorbot-rabbitmq \
+  -p 5672:5672 \
+  -p 15672:15672 \
+  rabbitmq:3.13-management
+```
+
+Explicar los puertos:
+| Puerto | Protocolo | Uso                                    |
+|--------|-----------|----------------------------------------|
+| 5672   | AMQP      | Comunicación entre servicios y Rabbit  |
+| 15672  | HTTP      | Panel de administración web            |
+
+Verificar que está corriendo:
+```bash
+docker ps --filter name=tutorbot-rabbitmq
+```
+
+Abrir el panel de administración en el navegador:
+- URL: http://localhost:15672
+- Usuario: guest
+- Contraseña: guest
+
+[Captura: Panel de RabbitMQ mostrando el dashboard con Overview]
+
+3.4 Habilitar la mensajería en el código
+Explica que el código ya tiene toda la infraestructura de RabbitMQ implementada pero DESHABILITADA mediante un feature flag. Esto es un patrón común en la industria llamado "Feature Flags" o "Feature Toggles".
+
+Editar `application-dev.properties` en AMBOS servicios. Los archivos están en:
+```
+backend/evaluator-service/src/main/resources/application-dev.properties
+backend/gap-detector-service/src/main/resources/application-dev.properties
+```
+
+Cambiar estas líneas:
+```properties
+# ANTES (messaging deshabilitado):
+tutorbot.messaging.enabled=false
+spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+# spring.rabbitmq.host=localhost
+# spring.rabbitmq.port=5672
+
+# DESPUÉS (messaging habilitado):
+tutorbot.messaging.enabled=true
+# spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+spring.rabbitmq.host=localhost
+spring.rabbitmq.port=5672
+```
+
+Resumen de los 3 cambios en cada archivo:
+1. `tutorbot.messaging.enabled` → cambiar de `false` a `true`
+2. `spring.autoconfigure.exclude` → COMENTAR la línea (poner # al inicio)
+3. `spring.rabbitmq.host` y `spring.rabbitmq.port` → DESCOMENTAR (quitar el #)
+
+Explica qué hace cada cambio técnicamente:
+- `tutorbot.messaging.enabled=true` activa los beans anotados con `@ConditionalOnProperty`: las clases `EvaluatorInfrastructureConfig`, `EvaluatorEventListener`, `GapDetectorMessagingConfig` y `GapDetectorEventListener`.
+- Quitar la exclusión de `RabbitAutoConfiguration` permite que Spring Boot cree automáticamente la conexión a RabbitMQ.
+- Las propiedades `spring.rabbitmq.*` le dicen a Spring dónde está RabbitMQ.
+
+3.5 Reiniciar los servicios
+Detener ambos servicios (Ctrl+C en cada terminal) y volverlos a correr:
+
+```bash
+# Terminal 1
+cd backend/evaluator-service
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+
+# Terminal 2
+cd backend/gap-detector-service
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+Señales de éxito adicionales (que NO aparecían antes):
+```
+Created new connection: rabbitConnectionFactory... [delegate=amqp://guest@127.0.0.1:5672/]
+```
+
+Si ven "Connection refused" para RabbitMQ, verificar que el contenedor esté corriendo con `docker ps`.
+
+3.6 Verificar las colas en RabbitMQ
+Ir a http://localhost:15672 → pestaña "Queues and Streams". Deben ver estas 3 colas creadas automáticamente:
+
+| Cola                  | Productor             | Consumidor             |
+|-----------------------|-----------------------|------------------------|
+| student.answered      | (externo/futuro)      | evaluator-service      |
+| evaluation.completed  | evaluator-service     | gap-detector-service   |
+| gap.detected          | gap-detector-service  | (futuro servicio)      |
+
+[Captura: Panel de RabbitMQ mostrando las 3 colas]
+
+3.7 Probar el flujo Event-Driven completo
+Ahora pueden publicar un mensaje manualmente en RabbitMQ y ver cómo fluye por ambos servicios.
+
+En el panel de RabbitMQ (http://localhost:15672):
+1. Ir a Queues → click en "student.answered"
+2. Expandir "Publish message"
+3. En "Payload" pegar:
+```json
+{
+  "sessionId": "SESSION-RABBIT-TEST",
+  "studentId": "A00835099",
+  "questionText": "¿Qué es polimorfismo en Java?",
+  "studentAnswer": "Es cuando una clase puede tener múltiples formas.",
+  "correctAnswer": "Es la capacidad de un objeto de tomar múltiples formas. En Java se logra con herencia y la sobreescritura de métodos.",
+  "maxScore": 100,
+  "topicId": 3
+}
+```
+4. Click en "Publish message"
+
+Observar en los logs:
+- evaluator-service: "Received student.answered event for student=A00835099"
+- evaluator-service: "Published evaluation.completed for evaluationId=..."
+- gap-detector-service: "Received evaluation.completed for student=A00835099"
+- gap-detector-service: "Gap analysis complete: X gaps detected for student=A00835099"
+
+Después verificar con Postman:
+- GET http://localhost:8082/api/v1/evaluations/student/A00835099 → debe aparecer la nueva evaluación
+- GET http://localhost:8084/api/v1/gaps/student/A00835099 → pueden aparecer gaps detectados
+
+NOTA: El evaluator-service intentará usar Ollama para generar el score y feedback. Si Ollama no está corriendo, el servicio manejará el error gracefully y puede asignar un score por defecto o fallar ese mensaje específico. Eso se resolverá en el siguiente laboratorio.
+
+3.8 ✅ Entregable Parte 2
+- Screenshot del panel de RabbitMQ mostrando las 3 colas
+- Screenshot de los logs de ambos servicios procesando un evento de "student.answered"
+- Screenshot de Postman verificando que la evaluación creada via RabbitMQ se persistió en Oracle
+- Captura del `application-dev.properties` modificado con messaging habilitado
+
+═══════════════════════════════════════
+SECCIÓN 4 — TROUBLESHOOTING (SOLUCIÓN DE PROBLEMAS)
+═══════════════════════════════════════
+
+Genera una tabla extensa de problemas comunes y soluciones:
+
+| Síntoma | Causa probable | Solución |
+|---------|----------------|----------|
+| "Unable to open JDBC Connection" | Oracle no está corriendo o la URL es incorrecta | Verificar `docker ps`, revisar `application-dev.properties` |
+| "Schema-validation: missing table [EVALUATIONS]" | No se ejecutó V1__init_schema.sql | Ejecutar el script DDL (paso 2.3) |
+| "Schema-validation: wrong column type [confidence]" | La columna CONFIDENCE es NUMBER(5,2) en vez de FLOAT | Ejecutar: `ALTER TABLE GAPS MODIFY CONFIDENCE FLOAT;` |
+| "Connection refused: localhost:5672" | RabbitMQ no está corriendo | `docker start tutorbot-rabbitmq` |
+| "password has expired" (ORA-28001) | La contraseña de Oracle expiró | Conectar como sysdba y ejecutar: `ALTER USER tu_usuario IDENTIFIED BY tu_password ACCOUNT UNLOCK;` |
+| Caracteres raros (á → ?) en los datos | NLS_LANG no estaba configurado al insertar | Borrar datos, re-ejecutar con `NLS_LANG=AMERICAN_AMERICA.AL32UTF8` |
+| Maven descarga muchas dependencias | Primera ejecución | Es normal, solo la primera vez |
+| Puerto 8082 o 8084 ya en uso | Otro proceso ocupa el puerto | `lsof -i :8082` para encontrarlo, `kill -9 PID` para matarlo |
+
+═══════════════════════════════════════
+SECCIÓN 5 — GLOSARIO
+═══════════════════════════════════════
+
+| Término | Definición |
+|---------|------------|
+| Microservicio | Servicio independiente con una responsabilidad específica |
+| JPA | Java Persistence API — estándar de mapeo objeto-relacional |
+| Hibernate | Implementación de JPA que genera SQL automáticamente |
+| ddl-auto=validate | Hibernate solo verifica que las tablas existan, no las modifica |
+| SEQUENCE | Generador de IDs numéricos en Oracle (diferente a AUTO_INCREMENT de MySQL) |
+| CLOB | Character Large Object — columna para textos largos en Oracle |
+| Feature Flag | Bandera en configuración que habilita/deshabilita funcionalidad sin cambiar código |
+| AMQP | Advanced Message Queuing Protocol — protocolo de mensajería que usa RabbitMQ |
+| Message Broker | Intermediario que recibe, almacena y enruta mensajes entre servicios |
+| Idempotente | Script que produce el mismo resultado sin importar cuántas veces se ejecute |
+| Spring Profile | Mecanismo para activar configuración diferente según el entorno (dev, prod) |
+
+═══════════════════════════════════════
+FORMATO Y ESTILO
+═══════════════════════════════════════
+- Usa encabezados numerados jerárquicos (1, 1.1, 1.2...)
+- Tablas con bordes completos
+- Bloques de código con fondo gris claro y fuente monoespaciada
+- Iconos/emojis para las notas importantes: ⚠️ para warnings, ✅ para verificación, 💡 para tips
+- Recuadros de "NOTA" y "IMPORTANTE" con borde lateral azul
+- Pie de página con número de página
+- El documento debe tener entre 12 y 18 páginas

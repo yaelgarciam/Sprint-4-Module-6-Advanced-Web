@@ -1,0 +1,7 @@
+com/tutorbot/notifier/model/NotificationMessage.class
+com/tutorbot/notifier/NotifierServiceApplication.class
+com/tutorbot/notifier/agent/NotifierAgent.class
+com/tutorbot/notifier/service/NotificationService.class
+com/tutorbot/notifier/config/NotifierInfrastructureConfig.class
+com/tutorbot/notifier/controller/NotificationController.class
+com/tutorbot/notifier/repository/NotificationMessageRepository.class
